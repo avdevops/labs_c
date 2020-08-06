@@ -1,0 +1,4 @@
+FROM scratch
+MAINTAINER adi adi3399@gmail.com
+RUN yum update
+CMD ["uname"]
