@@ -1,0 +1,59 @@
+FROM ubuntu:18.04
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Calcutta
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt-get update -y && apt-get install init -y
+RUN apt-get install telnet -y
+RUN apt-get install apache2 -y
+RUN apt-get install apache2-utils -y
+RUN apt-get install php libapache2-mod-php -y
+RUN apt-get clean
+RUN sed -i 's/Listen 80/Listen 8080/g' /etc/apache2/ports.conf
+RUN apt-get install software-properties-common -y
+RUN add-apt-repository ppa:deadsnakes/ppa -y
+RUN apt-get update -y
+#RUN apt-get install python3.8 -y
+#RUN cd /usr/bin; unlink python3;ln -s python3.8 python3;cd $HOME
+RUN apt-get install python3-pip -y
+RUN pip3 install fyers_api
+RUN pip3 install kiteconnect
+RUN pip3 install matplotlib
+#RUN pip3 install mysql.connector-rf
+RUN pip3 install mysql-connector-python-rf
+RUN pip3 install nsepy
+RUN pip3 install nsetools
+RUN pip3 install pandas
+RUN pip3 install pyperclip
+RUN pip3 install yahoo_fin
+RUN pip3 install yfinance
+RUN pip3 install mysql-connector-python
+RUN pip3 install requests_html
+RUN pip3 install service_identity
+RUN apt install python3-opencv -y
+ENV MYSQL_PWD password
+RUN echo "mysql-server mysql-server/root_password password $MYSQL_PWD" | debconf-set-selections
+RUN echo "mysql-server mysql-server/root_password_again password $MYSQL_PWD" | debconf-set-selections
+RUN apt-get install mysql-server -y
+RUN apt-get install iptables sudo -y
+RUN apt-get install ufw -y
+RUN apt install php-mysql -y
+RUN apt-get install php-mysqlnd -y
+RUN mkdir -p /appl/fyers/package
+RUN mkdir -p logs
+COPY package/* /appl/fyers/
+COPY package/signals.php /var/www/html/
+COPY package/holdings.php /var/www/html/
+RUN chmod +x /appl/fyers/*.sh
+COPY index.html /var/www/html/index.html
+COPY info.php /var/www/html/info.php
+COPY mysqlconnect.php /var/www/html/mysqlconnect.php
+COPY .stockapp .
+COPY .stockapproot .
+COPY .stockapproot .my.cnf
+COPY start_all.sh /usr/local/start_all.sh
+COPY cronfile .
+RUN crontab < cronfile
+COPY setupdb.sh .
+EXPOSE 8080
+#CMD [ "apache2ctl", "-D", "FOREGROUND" ]
+CMD apache2ctl -D FOREGROUND; systemctl start mysql;chmod +x setupdb.sh;./setupdb.sh;
