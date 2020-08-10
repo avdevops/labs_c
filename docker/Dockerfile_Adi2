@@ -1,0 +1,8 @@
+FROM nginx
+MAINTAINER adi adi3399@gmail.com
+RUN apt-get update
+COPY index.html /usr/share/nginx/html/index.html
+COPY start_all.sh /usr/local/start_all.sh
+ENTRYPOINT service nginx restart && bash
+CMD ["/usr/local/start_all.sh"]
+EXPOSE 80
